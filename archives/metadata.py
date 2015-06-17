@@ -11,5 +11,5 @@ from archives.statename_list import statename_list
 from collections import OrderedDict
 
 lastname_dict = OrderedDict()
-for name_id, name in enumerate(lastname_list):
-    lastname_dict[name_id] = name
+for lastname_id, lastname in enumerate(lastname_list):
+    lastname_dict[lastname_id] = lastname

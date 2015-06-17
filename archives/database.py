@@ -14,7 +14,7 @@ task = {
 
 Import Command
 --------------
-    from archives.database import client, task, backup
+    from archives.database import client, task, birth, death, marriage, divorce
 """
 
 from pymongo import MongoClient
@@ -22,6 +22,10 @@ from pymongo import MongoClient
 client = MongoClient()
 db = client.archives
 task = db.task
+birth = db.birth
+death = db.death
+marriage = db.marriage
+divorce = db.divorce
 
 if __name__ == "__main__":
-    pass
+    print(task.find({"type": 2, "year": 2003}).count())

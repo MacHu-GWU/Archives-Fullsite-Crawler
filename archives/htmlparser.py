@@ -35,25 +35,6 @@ class HTMLParser():
                 yield record
             break # only need the first resultsLists div block
     
-    def records(self, html):
-        """deathrecord generator from result page.
-        silently handle exception
-        """
-        soup = BS4(html)
-        for resultVital in soup.find_all("div", id = "resultVital"):
-            for resultBox in resultVital.find_all("div", class_ = "resultBox"):
-                
-                resultRows = resultBox.find_all("div", class_ = "resultRow")
-                resultRows.pop()
-                
-                record = dict()
-                for resultRow in resultRows:
-                    field = resultRow.find("div", class_ = "field").text.strip()
-                    fieldValue = resultRow.find("div", class_ = "fieldValue").text.strip()
-                    record[field] = fieldValue
-                yield record
-
-
 htmlparser = HTMLParser()
 
 if __name__ == "__main__":

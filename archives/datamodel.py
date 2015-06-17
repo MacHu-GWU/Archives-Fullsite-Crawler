@@ -1,6 +1,6 @@
 ##encoding=utf-8
 
-from angora.DATA.timewrapper import timewrapper
+from archives.timewrapper import timewrapper
 
 class DataModel():
     def __init__(self):
@@ -9,9 +9,10 @@ class DataModel():
             "Death Date:": "2",
             "Marriage Date:": "3",
             "Divorce Date:": "4",
-            "Name:": "5",
-            "Location:": "6",
-            "Collection:": "7",
+            "Lastname": "5",
+            "Name:": "6",
+            "Location:": "7",
+            "Collection:": "8",
             }
         for key, value in list(self.key_map.items()):
             self.key_map[value] = key.replace(":", "")

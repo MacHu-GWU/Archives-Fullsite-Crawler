@@ -1,14 +1,16 @@
 ##encoding=utf-8
 
-from archives.database import client, task, backup
+from archives.database import client, task, birth, death, marriage, divorce
 from archives.metadata import lastname_dict
 from archives.urlencoder import urlencoder
 from archives.htmlparser import htmlparser
 from archives.spider import spider
-from angora.DATA import *
+from archives.js import safe_dump_js
+from archives.fingerprint import fingerprint
 from multiprocessing.dummy import Pool
 import sys
 import os
+
 
 def select_todo_url(record_type, year):
     """
@@ -38,19 +40,24 @@ def select_todo_url(record_type, year):
 
 def process_one(argument):
     """unit processor function for multithread crawler
+    argument = (record_type, lastname_id, lastname, year, pagenumber, leftcounter)
     """
-    record_type, name_id, name, year, pagenum, left_counter = argument
-    url = urlencoder.url_death_record(name, year, 1000, pagenum)
+    record_type, lastname_id, lastname, year, pagenum, left_counter = argument
+    url = urlencoder.url_death_record(lastname, year, 1000, pagenum)
     html = spider.html(url)
     if html:
         try:
-            data = list(htmlparser.extract_records(html))
+            data = list()
+            for record in htmlparser.extract_records(html):
+                record.setdefault("Lastname:", lastname)
+                record.setdefault("Year:", year)
+                data.append(record)
             if len(data) > 0:
-                _id = md5_obj( (record_type, name_id, year, pagenum) )
+                _id = fingerprint.of_text("%s_%s_%s_%s" % (record_type, lastname_id, year, pagenum) )
                 safe_dump_js(data, r"pipeline_%s\%s.json" % (record_type, _id), enable_verbose=False)
                 task.update({"_id": _id}, {"$set": {"flag": True}}) # edit document in task
                 print("successfully crawled type=%s, year=%s, lastname='%s', pagenum=%s; %s url left" % (
-                            record_type, year, name, pagenum, left_counter))
+                            record_type, year, lastname, pagenum, left_counter))
         except:
             pass
 

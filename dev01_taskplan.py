@@ -11,7 +11,7 @@ from archives.metadata import lastname_dict
 from archives.urlencoder import urlencoder
 from archives.htmlparser import htmlparser
 from archives.spider import spider
-from angora.DATA.hashutil import md5_obj
+from archives.fingerprint import fingerprint
 import math
 import sys
 
@@ -23,7 +23,7 @@ def taskplan(record_type, year):
         if there are 25000 records for: record_type = death, year = 2000, lastname = smith, since
         the webpage display 1000 records per page, so we create pagenumber from 1 to 25 for this
         query. and save it in mongodb database (db = archives, collection = task) like this:
-            {_id: md5 string, type: 2, name_id: 0, year: 2000, nth: 1, flag: false}
+            {_id: md5 string, type: 2, lastname_id: 0, year: 2000, nth: 1, flag: false}
             ... nth + 1
     
     For more information about task plan data model, see archives.database.py
@@ -37,12 +37,12 @@ def taskplan(record_type, year):
             4. divorce record
         year: 4 digits year
     """
-    for name_id, name in lastname_dict.items():
-        # check if we did this record_type, name_id, year combination before
-        _id = md5_obj( (record_type, name_id, year, 1) )
+    for lastname_id, lastname in lastname_dict.items():
+        # check if we did this record_type, lastname_id, year combination before
+        _id = fingerprint.of_text("%s_%s_%s_%s" % (record_type, lastname_id, year, 1) )
         if task.find({"_id": _id}).count() == 0: # only do it when we never do it
-            print("processing lastname=%s in %s ..." % (name, year))
-            url = urlencoder.url_death_record(name, year, 10, 1)
+            print("processing lastname=%s in %s ..." % (lastname, year))
+            url = urlencoder.url_death_record(lastname, year, 10, 1)
             html = spider.html(url)
             if html:
                 try:
@@ -50,9 +50,9 @@ def taskplan(record_type, year):
                     max_pagenum = int(math.ceil(float(num_of_records)/1000))+1
                     print("\tWe got %s pages to crawl" % max_pagenum)
                     for pagenum in range(1, max_pagenum+1):
-                        doc = {"_id": md5_obj( (record_type, name_id, year, pagenum) ),
+                        doc = {"_id": fingerprint.of_text("%s_%s_%s_%s" % (record_type, lastname_id, year, pagenum) ),
                                "type": record_type,
-                               "name_id": name_id,
+                               "lastname_id": lastname_id,
                                "year": year,
                                "nth": pagenum,
                                "flag": False}
@@ -61,8 +61,7 @@ def taskplan(record_type, year):
                     except:
                         pass
                 except:
-                    pass
-#                 
+                    pass           
 
 if __name__ == "__main__":
     record_type, year = int(sys.argv[1]), int(sys.argv[2])
