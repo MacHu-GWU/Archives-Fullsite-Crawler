@@ -11,6 +11,7 @@ import random
 class UrlEncoder():
     base_url = "http://www.archives.com/member/"
     available_activity_id = [
+        "8d99f71d-432a-428f-b5e4-ad02e84925b4",
         "db4af76f-426b-4e8c-9fe7-0b88b9c4d179",
         "bebd6b46-e347-4667-b476-ac580ec21d48",
         "ad1ef8c1-6bef-4010-aa95-1f089abe0f50",

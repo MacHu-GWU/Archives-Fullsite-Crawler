@@ -49,22 +49,23 @@ def taskplan(record_type, year):
                     num_of_records = htmlparser.get_total_number_of_records(html)
                     max_pagenum = int(math.ceil(float(num_of_records)/1000))+1
                     print("\tWe got %s pages to crawl" % max_pagenum)
-                    for i in range(1, max_pagenum+1):
-                        doc = {"_id": md5_obj( (record_type, name_id, year, i) ),
+                    for pagenum in range(1, max_pagenum+1):
+                        doc = {"_id": md5_obj( (record_type, name_id, year, pagenum) ),
                                "type": record_type,
                                "name_id": name_id,
                                "year": year,
-                               "nth": i,
+                               "nth": pagenum,
                                "flag": False}
-                        try:
-                            task.insert(doc)
-                        except:
-                            pass
+                    try:
+                        task.insert(doc)
+                    except:
+                        pass
                 except:
                     pass
-                
+#                 
 
 if __name__ == "__main__":
     record_type, year = int(sys.argv[1]), int(sys.argv[2])
+#     record_type, year = 2, 2007
     taskplan(record_type, year)
     client.close()

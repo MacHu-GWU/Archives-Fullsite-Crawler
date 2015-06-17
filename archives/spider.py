@@ -54,7 +54,7 @@ class ArchivesSpider():
         try:
             return self.session.get(url, 
                         headers=self.default_header, timeout=self.default_timeout).\
-                        content.encode("utf-8")
+                        content.decode("utf-8")
         except:
             return None
 
@@ -62,3 +62,4 @@ spider = ArchivesSpider()
 
 if __name__ == "__main__":
     print(spider.html("http://www.archives.com/member/Default.aspx?_act=VitalSearchResult&LastName=Smith&DeathYear=2012&State=AK&Country=US&Location=AK&ShowSummaryLink=1&RecordType=2&activityID=ad1ef8c1-6bef-4010-aa95-1f089abe0f50"))
+#     print(spider.html("http://www.archives.com/member/Default.aspx?_act=VitalSearchResult&LastName=Smith&DeathYear=2007&Country=US&State=&Location=US&ShowSummaryLink=1&RecordType=2&activityID=db4af76f-426b-4e8c-9fe7-0b88b9c4d179&pagesize=10&pageNumber=1&pagesizeAP=10&pageNumberAP=1"))
