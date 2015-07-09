@@ -1,16 +1,15 @@
-from archives.database import client, task, birth, death, marriage, divorce
+from archives.database import client, db, task, birth, death, marriage, divorce
 from archives.metadata import lastname_dict
+from archives.windowsexplorer import string_SizeInBytes
+from pprint import pprint as ppt
 
 """
-in birth we have 202936 data
-in death we have 511535 data
-in marriage we have 408358 data
-in divorce we have 222500 data
+2015-07-09
+In birth we have 745,847 records.
+In death we have 2,302,602 records.
+In marriage we have 2,044,892 records.
+In divorce we have 628,018 records.
 """
-# for record_type in range(1, 4+1):
-#     for year in range(2000, 2014):
-#         print(record_type, year, task.find({"type": record_type,
-#                                             "year": year}).count())
 
 def stringlize(number):
     res = list()
@@ -23,6 +22,8 @@ def stringlize(number):
     return ",".join(res[::-1])
 
 def general_crawler_status():
+    dbstats = db.command("dbstats")
+    print("storage size: %s" % string_SizeInBytes(dbstats["storageSize"]))
     for collection in [birth, death, marriage, divorce]:
         print("In %s we have %s records." % (
             collection.name, stringlize(collection.count())))
@@ -34,5 +35,5 @@ def crawler_status(year):
                 collection.name, year, stringlize(total)))
         
 if __name__ == "__main__":
-#     general_crawler_status()
-    crawler_status(2001)
+    general_crawler_status()
+#     crawler_status(2001)
