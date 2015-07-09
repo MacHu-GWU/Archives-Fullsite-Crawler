@@ -11,9 +11,12 @@ from multiprocessing.dummy import Pool
 import sys
 import os
 
-
 def select_todo_url(record_type, year):
     """
+    Return a argument list for multithread crawler.
+    arugments is a tuple of:
+        (record_type, lastname_id, lastname, year, pagenum, left_counter)
+        
     [args]
     ------
         record_type:
@@ -24,11 +27,11 @@ def select_todo_url(record_type, year):
         year: 4 digits year
     """
     todo = list()
-    for doc in task.find({"type": record_type, "year": year, "flag": False}).limit(100*100):
+    for doc in task.find({"type": record_type, "year": year, "flag": False}).limit(20000):
         todo.append([
             doc["type"],
-            doc["name_id"],
-            lastname_dict[doc["name_id"]],
+            doc["lastname_id"],
+            lastname_dict[doc["lastname_id"]],
             doc["year"],
             doc["nth"],
             ])
@@ -43,23 +46,44 @@ def process_one(argument):
     argument = (record_type, lastname_id, lastname, year, pagenumber, leftcounter)
     """
     record_type, lastname_id, lastname, year, pagenum, left_counter = argument
-    url = urlencoder.url_death_record(lastname, year, 1000, pagenum)
+    if record_type == 1:
+        url = urlencoder.url_birth_record(lastname, year, 1000, pagenum)
+        date_key = "Birth Date:"
+    elif record_type == 2:
+        url = urlencoder.url_death_record(lastname, year, 1000, pagenum)
+        date_key = "Death Date:"
+    elif record_type == 3:
+        url = urlencoder.url_marriage_record(lastname, year, 1000, pagenum)
+        date_key = "Marriage Date:"
+    elif record_type == 4:
+        url = urlencoder.url_divorce_record(lastname, year, 1000, pagenum)
+        date_key = "Divorce Date:"
+
     html = spider.html(url)
+    
     if html:
         try:
             data = list()
             for record in htmlparser.extract_records(html):
-                record.setdefault("Lastname:", lastname)
-                record.setdefault("Year:", year)
+                record.setdefault("Lastname:", lastname) # <== create new field "Lastname:"
+                record.setdefault("Year:", year) # <== create new field "Year:"
+    
+                record["_id"] = fingerprint.of_text("%s_%s_%s" % (
+                                    record.get("Name:", None),
+                                    record.get(date_key, None),
+                                    record.get("Location:", None),
+                                    ))
+                
                 data.append(record)
+
             if len(data) > 0:
                 _id = fingerprint.of_text("%s_%s_%s_%s" % (record_type, lastname_id, year, pagenum) )
                 safe_dump_js(data, r"pipeline_%s\%s.json" % (record_type, _id), enable_verbose=False)
                 task.update({"_id": _id}, {"$set": {"flag": True}}) # edit document in task
                 print("successfully crawled type=%s, year=%s, lastname='%s', pagenum=%s; %s url left" % (
                             record_type, year, lastname, pagenum, left_counter))
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
 def singlethread_process(record_type, year):
     todo = select_todo_url(record_type, year)
@@ -78,5 +102,8 @@ if __name__ == "__main__":
             os.mkdir("pipeline_%s" % i)
         except:
             pass
-    record_type, year = int(sys.argv[1]), int(sys.argv[2])
-    mutithread_process(record_type, year)
+#     record_type, year = int(sys.argv[1]), int(sys.argv[2])
+#     record_type, year = 1, 2000
+    record_type = 4
+    for year in range(2000, 2014+1):
+        mutithread_process(record_type, year)
