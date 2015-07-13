@@ -26,8 +26,11 @@ class EmailClient():
     def __init__(self, config):
         self.config = config
         self.server = smtplib.SMTP()
+        
+    def login(self):
         self.server.connect(host=self.config.smtpServer, port=self.config.port)
         self.server.login(self.config.acc, self.config.pwd)
+        self.server.ehlo() # say hi to server
         
     def send_text(self, toAddr, subject, content):
         """Send simple pure text email to multiple recipients. No attachments, text only.
@@ -43,6 +46,9 @@ class EmailClient():
         msg["To"] = ", ".join(toAddr)
         self.server.sendmail(self.config.acc, toAddr, msg.as_string())
     
+    def quit(self):
+        self.server.quit()
+        
 config = Config(
             smtpServer="smtpout.secureserver.net",
             port=3535,
@@ -52,4 +58,13 @@ config = Config(
 efa_client = EmailClient(config=config)
 
 if __name__ == "__main__":
+    import time
+    print("send first")
+    efa_client.login()
     efa_client.send_text(["sanhe.hu@theeagleforce.net"], "Greeting", "This is a test email. For testing my email bot.")
+    efa_client.quit()
+    time.sleep(60)
+    print("send second")
+    efa_client.login()
+    efa_client.send_text(["sanhe.hu@theeagleforce.net"], "Greeting", "This is a test email. For testing my email bot.")
+    efa_client.quit()

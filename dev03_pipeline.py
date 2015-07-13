@@ -42,7 +42,10 @@ def push2db():
 if __name__ == "__main__":
     sleeptime = 60
     while 1:
-        push2db()
+        try:
+            push2db()
+        except:
+            pass
         print("Sleeping for %s seconds... ZZZ..." % sleeptime)
         time.sleep(sleeptime)
         

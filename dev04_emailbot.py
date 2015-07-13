@@ -24,6 +24,7 @@ def run_monitor():
     tomorrow = now + timedelta(1)
     tomorrow = datetime(tomorrow.year, tomorrow.month, tomorrow.day, 8, 0, 0)
     total_seconds = (tomorrow - now).total_seconds()
+    print("Sleep for %s seconds" % total_seconds)
     time.sleep(total_seconds)
     
     while 1:
@@ -38,14 +39,22 @@ def run_monitor():
         message_lines.append("By %s." % datetime.now())
         
         message = "\n".join(message_lines)
-        efa_client.send_text([
-                      "sanhe.hu@theeagleforce.net", 
-                      "Amina.Khawaja@theeagleforce.net",
-                      ], 
-                     "Archive Crawler Daily Report", 
-                     message)
-        print("Email been sent at %s, ZZZ..." % datetime.now())
-        time.sleep(3600*24)
+        while 1:
+            try:
+                efa_client.login()
+                efa_client.send_text([
+                              "sanhe.hu@theeagleforce.net", 
+                              "Amina.Khawaja@theeagleforce.net",
+                              ], 
+                             "Archive Crawler Daily Report", 
+                             message)
+                efa_client.quit()
+                print("Email been sent at %s, ZZZ..." % datetime.now())
+                break
+            except Exception as e:
+                print(e)
+                time.sleep(10)
+        time.sleep(60)
         
 if __name__ == "__main__":
     run_monitor()
